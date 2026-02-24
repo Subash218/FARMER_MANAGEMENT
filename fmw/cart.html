@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart | FarmStore</title>
+    <link rel="icon" href="img/a4.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="shop.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg shop-header sticky-top">
+        <div class="container">
+            <a class="navbar-brand text-success fw-bold" href="ecommerce.html">
+                <i class="fas fa-shopping-basket me-2"></i>FarmStore
+            </a>
+            <div class="ms-auto">
+                <a href="ecommerce.html" class="btn btn-outline-secondary btn-sm">Continue Shopping</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <h1 class="mb-4 fw-bold">Your Cart 🛒</h1>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4" id="cartContainer">
+                        <!-- Cart Items will be injected here -->
+                        <p class="text-center text-muted">Your cart is empty.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="checkout-summary sticky-top" style="top: 100px;">
+                    <h4 class="fw-bold mb-4">Order Summary</h4>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span id="subtotal">₹0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping</span>
+                        <span class="text-success">Free</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="h5 fw-bold">Total</span>
+                        <span class="h5 fw-bold text-success" id="total">₹0</span>
+                    </div>
+                    <a href="checkout.html" class="btn btn-shop-primary w-100 py-2 fw-bold" id="checkoutBtn">Proceed to
+                        Checkout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCart();
+        });
+
+        function renderCart() {
+            const cartContainer = document.getElementById('cartContainer');
+            let cart = JSON.parse(localStorage.getItem('farmCart')) || [];
+
+            if (cart.length === 0) {
+                cartContainer.innerHTML = '<div class="text-center py-5"><i class="fas fa-shopping-basket fa-3x text-muted mb-3"></i><p class="lead">Your cart is empty.</p><a href="ecommerce.html" class="btn btn-shop-outline mt-2">Browse Products</a></div>';
+                document.getElementById('checkoutBtn').classList.add('disabled');
+                updateSummary(0);
+                return;
+            }
+
+            document.getElementById('checkoutBtn').classList.remove('disabled');
+            cartContainer.innerHTML = '';
+
+            let total = 0;
+
+            // Group duplicate items for display
+            // For simplicity in this demo, just listing line by line or handle duplicates if strict quantity needed
+            // Here, let's just list them. Better: Group by ID.
+
+            const counts = {};
+            cart.forEach(item => {
+                const id = item.id;
+                if (!counts[id]) counts[id] = { ...item, qty: 0 };
+                counts[id].qty++;
+            });
+
+            Object.values(counts).forEach(item => {
+                const itemTotal = item.price * item.qty;
+                total += itemTotal;
+
+                const div = document.createElement('div');
+                div.className = 'cart-item d-flex justify-content-between align-items-center';
+                div.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-box text-success fa-lg"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">${item.name}</h6>
+                            <small class="text-muted">₹${item.price} x ${item.qty}</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <p class="mb-0 fw-bold">₹${itemTotal}</p>
+                        <button class="btn btn-link text-danger p-0 small text-decoration-none" onclick="removeFromCart('${item.id}')">Remove</button>
+                    </div>
+                `;
+                cartContainer.appendChild(div);
+            });
+
+            updateSummary(total);
+        }
+
+        function updateSummary(total) {
+            document.getElementById('subtotal').innerText = `₹${total}`;
+            document.getElementById('total').innerText = `₹${total}`;
+        }
+
+        function removeFromCart(id) {
+            let cart = JSON.parse(localStorage.getItem('farmCart')) || [];
+            // Remove ALL instances of this ID? Or just one?
+            // Let's remove all for simplicity in this demo, or filter one out.
+            // Let's filter out all items with this ID to keep it simple for now.
+
+            cart = cart.filter(item => item.id !== id);
+            localStorage.setItem('farmCart', JSON.stringify(cart));
+            renderCart();
+        }
+    </script>
+</body>
+
+</html>
